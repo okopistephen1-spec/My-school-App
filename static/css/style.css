@@ -1,0 +1,13 @@
+body {
+    background-color: #10172a;
+    color: #ffffff;
+    margin: 0;
+}
+
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    margin: 15px;
+}
