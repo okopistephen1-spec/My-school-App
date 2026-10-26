@@ -1,30 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <title>SmoothPlays</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    </head>
-    
-    <body>
-        <div class="top-header">
-            <div class="logo">
-                <header>SmoothPlays</header>
-            </div>
+    <title>SmoothPlays | Your Music Space</title>
 
-            <nav class="categories">
-                <a href="#">All</a>
-                <a href="#">Music</a>
-                <a href="#">Podcasts</a>
-                <a href="#">Audio Diary</a>
-            </nav>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-            <div class="profile">
-                <button>Profile</button>
-            </div>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#15121f">
+
+</head>
+
+<body>
+    <div class="app">
+
+        <header class="top-header">
+            <a href="/" class="logo">SmoothPlays</a>
+
+            <button class="profile-button" aria-label="Open profile">
+                Your Profile
+            </button>
+        </header>
+
+        <nav class="categories" aria-label="Music categories">
+            <button class="category active">All</button>
+            <button class="category">Music</button>
+            <button class="category">Podcasts</button>
+            <button class="category">Audiobooks</button>
+        </nav>
+
+        <main>
+            <section class="mood-section">
+                <h1>Made for your mood😎</h1>
+                <p class="section-subtitle">
+                    Find the sound that fits your moment.
+                </p>
+
+                <div class="mood-grid">
+                    <a href="#discover-music" class="mood-card mood-chill">
+                        <span class="mood-icon">☁</span>
+                        <span>Chill & Relax</span>
+                    </a>
+
+                    <a href="#discover-music" class="mood-card mood-night">
+                        <span class="mood-icon">☾</span>
+                        <span>Late Night</span>
+                    </a>
+
+                    <a href="#discover-music" class="mood-card mood-energy">
+                        <span class="mood-icon">ϟ</span>
+                        <span>High Energy</span>
+                    </a>
+
+                    <a href="#discover-music" class="mood-card mood-love">
+                        <span class="mood-icon">♡</span>
+                        <span>Love & Romance</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="discover-section" id="discover-music">
+                <div class="section-heading">
+                    <div>
+                        <h2>Discover music</h2>
+                        <p class="section-subtitle">
+                            New sounds waiting for you.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="songs-container" class="songs-container">
+                    <p>Loading music...</p>
+                </div>
+            </section>
+
+            <section class="genres-section">
+                <h2>Explore genres</h2>
+
+                <div class="genre-list">
+                    <a href="#discover-music" class="genre genre-afro">
+                        Afrobeats
+                    </a>
+
+                    <a href="#discover-music" class="genre genre-electronic">
+                        Electronic
+                    </a>
+
+                    <a href="#discover-music" class="genre genre-hiphop">
+                        Hip-Hop
+                    </a>
+
+                    <a href="#discover-music" class="genre genre-instrumental">
+                        Instrumental
+                    </a>
+                </div>
+            </section>
+
+            <section class="recent-section">
+                <h2>Pick up where you left off</h2>
+
+                <div class="recent-placeholder">
+                    <div class="recent-icon">♫</div>
+
+                    <div>
+                        <h3>Your listening journey</h3>
+                        <p>Your recently played music will appear here.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-navigation" aria-label="Main navigation">
+            <a href="/" class="bottom-link selected">
+                <span>⌂</span>
+                <small>Home</small>
+            </a>
+
+            <a href="#discover-music" class="bottom-link">
+                <span>⌕</span>
+                <small>Search</small>
+            </a>
+
+            <a href="#discover-music" class="bottom-link">
+                <span>▤</span>
+                <small>Your Library</small>
+            </a>
+
+            <a href="#" class="bottom-link">
+                <span>◉</span>
+                <small>Premium</small>
+            </a>
+
+            <a href="#" class="bottom-link">
+                <span>＋</span>
+                <small>Create</small>
+            </a>
+        </nav>
+
+    </div>
+
+<div class="music-player" id="music-player">
+    <div class="player-song">
+        <img id="player-image" src="" alt="Now">
+
+        <div class="player-song-info">
+            <h4 id="player-title">No song selected</h4>
+            <p id="player-artist">Choose a song to start listening</p>
         </div>
-       
-    </body>
-</html> 
+    </div>
+
+    <div class="player-controls">
+        <div class="player-buttons">
+            <button id="previous-button" aria-label="Previous song">⏮</button>
+            <button id="play-pause-button" aria-label="Play or pause">▶</button>
+            <button id="next-button" aria-label="Next song">⏭</button>
+        </div>
+
+        <div class="player-progress">
+            <span id="current-time">0:00</span>
+            <input
+                type="range"
+                id="progress-bar"
+                min="0"
+                max="100"
+                value="0"
+                aria-label="Song progress"
+            >
+            <span id="duration">0:00</span>
+        </div>
+    </div>
+
+    <div class="player-volume">
+        <label for="volume-control">🔊</label>
+        <input
+            type="range"
+            id="volume-control"
+            min="0"
+            max="1"
+            step="0.01"
+            value="1"
+            aria-label="Volume"
+        >
+    </div>
+
+    <audio id="main-audio" preload="metadata"></audio>
+</div>
+
+    <script src="{{ url_for('static', filename='js/songs.js') }}"></script>
+
+    <script>
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker.register(
+                "{{ url_for('static', filename='service-worker.js') }}"
+            )
+            .then((registration) => {
+                console.log("SmoothPlays service worker registered:", registration.scope);
+            })
+            .catch((error) => {
+                console.error("Service worker registration failed:", error);
+            });
+        });
+    }
+</script>
+
+</body>
+</html>

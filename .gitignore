@@ -1,0 +1,17 @@
+# Python virtual environments
+.venv/
+venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Environment variables and secrets
+.env
+
+# Local database
+smoothplays.db
+
+# Editor and operating system files
+.vscode/
+.DS_Store
