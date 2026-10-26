@@ -1,7 +1,8 @@
 async function loadSongs() {
     const container = document.getElementById("songs-container");
+    const searchInput = document.getElementById("search-input");
+    const clearSearchButton = document.getElementById("clear-search");
 
-    // Bottom music player elements
     const audio = document.getElementById("main-audio");
     const playerImage = document.getElementById("player-image");
     const playerTitle = document.getElementById("player-title");
@@ -30,6 +31,7 @@ async function loadSongs() {
     }
 
     function updatePlayButton() {
+        if (!playPauseButton) return;
         playPauseButton.textContent = audio.paused ? "▶" : "⏸";
         playPauseButton.setAttribute(
             "aria-label",
@@ -61,21 +63,22 @@ async function loadSongs() {
         playerImage.src = song.image || "";
         playerImage.alt = `Artwork for ${song.title}`;
 
-        playerTitle.textContent = song.title
+        const cleanTitle = (song.title || "Untitled Track")
             .replace(/\s*[\(\[]?(?:19|20)\d{2}[\)\]]?/g, "")
             .replace(/\s*[-|•]\s*.*$/, "")
             .trim();
 
-        playerArtist.textContent = song.artist;
+        playerTitle.textContent = cleanTitle || "Untitled Track";
+        playerArtist.textContent = song.artist || "Unknown artist";
 
-        audio.src = song.audio;
+        audio.src = song.audio || "";
         audio.load();
 
         progressBar.value = 0;
         currentTime.textContent = "0:00";
         durationDisplay.textContent = "0:00";
 
-        if (autoplay) {
+        if (autoplay && song.audio) {
             try {
                 await audio.play();
             } catch (error) {
@@ -87,67 +90,119 @@ async function loadSongs() {
         updatePlayButton();
     }
 
-    // Load songs from the Flask API
-    
-try {
-    container.textContent = "Loading songs...";
+    function renderSongs() {
+        if (!container) return;
 
-    const [jamendoResponse, audiusResponse] = await Promise.all([
-        fetch("/api/jamendo/songs"),
-        fetch("/api/audius/songs")
-    ]);
+        const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
+        const visibleSongs = songs.filter((song) => {
+            if (!query) return true;
 
-    if (!jamendoResponse.ok || !audiusResponse.ok) {
-        throw new Error("Failed to load songs from a music API");
-    }
+            const haystack = [
+                song.title,
+                song.artist,
+                song.genre,
+                song.album
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
 
-    const jamendoSongs = await jamendoResponse.json();
-    const audiusSongs = await audiusResponse.json();
+            return haystack.includes(query);
+        });
 
-    songs = [...jamendoSongs, ...audiusSongs];
-
-    container.innerHTML = "";
-
-
-        if (songs.length === 0) {
-            container.textContent = "No songs found.";
+        if (visibleSongs.length === 0) {
+            container.innerHTML = '<p class="empty-state">No songs match your search.</p>';
             return;
         }
 
-        songs.forEach((song, index) => {
-            const card = document.createElement("div");
-            card.className = "song-card";
+        container.innerHTML = "";
 
-            const image = document.createElement("img");
-            image.src = song.image || "";
-            image.alt = `Artwork for ${song.title}`;
-            image.className = "song-image";
+        visibleSongs.forEach((song) => {
+            const row = document.createElement("article");
+            row.className = "song-row";
 
-            const title = document.createElement("h3");
-            title.textContent = song.title;
+            const art = document.createElement("div");
+            art.className = "song-art";
+            art.style.backgroundImage = `url('${song.image || "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=400&q=80"}')`;
+
+            const meta = document.createElement("div");
+            meta.className = "song-meta";
+
+            const title = document.createElement("h4");
+            title.textContent = song.title || "Untitled Track";
 
             const artist = document.createElement("p");
-            artist.textContent = song.artist;
+            artist.textContent = `${song.artist || "Unknown artist"} • ${song.genre || "Loose mix"}`;
 
-            const playButton = document.createElement("button");
-            playButton.className = "play-button";
-            playButton.textContent = "▶ Play";
+            meta.append(title, artist);
 
-            playButton.addEventListener("click", () => {
-                selectSong(index);
+            const action = document.createElement("button");
+            action.type = "button";
+            action.className = "song-play-button";
+            action.textContent = "▶";
+            action.setAttribute("aria-label", `Play ${song.title || "track"}`);
+            action.addEventListener("click", () => {
+                const songIndex = songs.findIndex((entry) => entry.id === song.id && entry.title === song.title);
+                if (songIndex >= 0) {
+                    selectSong(songIndex);
+                }
             });
 
-            card.append(image, title, artist);
-            container.appendChild(card);
+            row.append(art, meta, action);
+            container.appendChild(row);
         });
-
-    } catch (error) {
-        console.error(error);
-        container.textContent =
-            "Unable to load songs. Please try again later.";
     }
 
-    // Bottom player controls
+    try {
+        container.innerHTML = '<p class="empty-state">Loading songs...</p>';
+
+        const [jamendoResponse, audiusResponse] = await Promise.all([
+            fetch("/api/jamendo/songs"),
+            fetch("/api/audius/songs")
+        ]);
+
+        if (!jamendoResponse.ok || !audiusResponse.ok) {
+            throw new Error("Failed to load songs from a music API");
+        }
+
+        const jamendoSongs = await jamendoResponse.json();
+        const audiusSongs = await audiusResponse.json();
+
+        songs = [...jamendoSongs, ...audiusSongs];
+
+        if (songs.length === 0) {
+            container.innerHTML = '<p class="empty-state">No songs found.</p>';
+            return;
+        }
+
+        renderSongs();
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = '<p class="empty-state">Unable to load songs. Please try again later.</p>';
+    }
+
+    if (clearSearchButton && searchInput) {
+        const syncClearState = () => {
+            if (searchInput.value.trim().length > 0) {
+                clearSearchButton.classList.remove("hidden");
+            } else {
+                clearSearchButton.classList.add("hidden");
+            }
+        };
+
+        searchInput.addEventListener("input", () => {
+            syncClearState();
+            renderSongs();
+        });
+
+        clearSearchButton.addEventListener("click", () => {
+            searchInput.value = "";
+            clearSearchButton.classList.add("hidden");
+            renderSongs();
+            searchInput.focus();
+        });
+    }
+
     playPauseButton.addEventListener("click", async () => {
         if (currentSongIndex === -1) {
             if (songs.length > 0) {
@@ -191,7 +246,6 @@ try {
         selectSong(nextIndex);
     });
 
-    // Update the progress display as the song plays
     audio.addEventListener("timeupdate", updateProgress);
     audio.addEventListener("loadedmetadata", updateProgress);
     audio.addEventListener("play", updatePlayButton);
@@ -203,11 +257,9 @@ try {
         }
     });
 
-    // Allow users to seek through a track
     progressBar.addEventListener("input", () => {
         if (Number.isFinite(audio.duration) && audio.duration > 0) {
-            audio.currentTime =
-                (Number(progressBar.value) / 100) * audio.duration;
+            audio.currentTime = (Number(progressBar.value) / 100) * audio.duration;
         }
     });
 }
