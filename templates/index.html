@@ -3,146 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0f1626">
+    <meta name="theme-color" content="#080A0B">
+    <meta name="description" content="Discover music and listen with SmoothPlays.">
     <title>SmoothPlays | Music for your mood</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 </head>
-<body>
+<body
+    data-screen="{{ page|default('home') }}"
+    data-player-source="{{ player_source|default('') }}"
+    data-player-track-id="{{ player_track_id|default('') }}"
+>
     <div class="app-shell">
-        <div class="page-glow page-glow-one"></div>
-        <div class="page-glow page-glow-two"></div>
+        <aside class="sidebar" aria-label="Primary navigation">
+            <a class="brand" href="/" aria-label="SmoothPlays home">
+                <span class="brand-mark" aria-hidden="true">s</span>
+                <span>Smooth<span>Plays</span></span>
+            </a>
 
-        <header class="top-header">
-            <div class="header-copy">
-                <span class="eyebrow">Good morning,</span>
-                <h1>Stephen</h1>
+            <p class="nav-label">MENU</p>
+            <nav class="side-nav">
+                <button class="side-link active" type="button" data-nav="home"><span aria-hidden="true">⌂</span> Home</button>
+                <button class="side-link" type="button" data-nav="search"><span aria-hidden="true">⌕</span> Search</button>
+            </nav>
+
+            <p class="nav-label library-label">YOUR LIBRARY</p>
+            <nav class="side-nav">
+                <button class="side-link" type="button" data-nav="library"><span aria-hidden="true">♡</span> Liked Songs</button>
+                <span class="side-link side-link-disabled" aria-disabled="true" title="Recently played history is not available in this version"><span aria-hidden="true">◷</span> Recently Played</span>
+                <span class="side-link side-link-disabled" aria-disabled="true" title="Playlist management is not available in this version"><span aria-hidden="true">▤</span> Playlists</span>
+            </nav>
+            <div class="sidebar-bottom">
+                <button class="side-link profile-link" type="button" data-profile><span aria-hidden="true">◉</span> Profile</button>
             </div>
+        </aside>
 
-            <button class="profile-button" aria-label="Open profile">S</button>
-        </header>
-
-        <section class="search-section" aria-label="Search songs">
-            <div class="search-shell">
-                <span class="search-icon">⌕</span>
-                <input id="search-input" type="text" placeholder="Search songs, artists, genres..." aria-label="Search songs" />
-                <button id="clear-search" type="button" class="clear-search hidden" aria-label="Clear search">✕</button>
-            </div>
-        </section>
-
-        <main class="main-content">
-            <section class="hero-section" aria-label="Featured playlist">
-                <div class="hero-card">
-                    <div class="hero-badge">Curated Daily</div>
-                    <div class="hero-contents">
-                        <div>
-                            <h2>Good Vibes Only</h2>
-                            <p>Curated playlist for your day.</p>
-                        </div>
-                        <button type="button" class="hero-play" aria-label="Play featured playlist">▶</button>
+        <div class="app-main">
+            <header class="top-header">
+                <div class="header-topline">
+                    <a class="mobile-brand" href="/" aria-label="SmoothPlays home">
+                        <span class="brand-mark" aria-hidden="true">s</span>
+                        <span>Smooth<span>Plays</span></span>
+                    </a>
+                    <div class="history-controls" aria-label="Page history">
+                        <button id="back-button" class="round-control" type="button" aria-label="Go back">‹</button>
+                        <button id="forward-button" class="round-control" type="button" aria-label="Go forward">›</button>
                     </div>
+                    <button class="profile-button" type="button" data-profile aria-label="Open profile">◉</button>
                 </div>
-            </section>
+                <div class="header-copy">
+                    <span class="eyebrow" id="header-eyebrow">YOUR SOUND, YOUR WAY</span>
+                    <h1 id="page-heading">Find your next favorite</h1>
+                </div>
+                <section class="search-section" id="search-section" aria-label="Search songs">
+                    <label class="search-shell" for="search-input">
+                        <span class="search-icon" aria-hidden="true">⌕</span>
+                        <input id="search-input" type="search" placeholder="Search songs, artists, albums..." autocomplete="off">
+                        <button id="clear-search" type="button" class="clear-search hidden" aria-label="Clear search">×</button>
+                    </label>
+                </section>
+            </header>
 
-            <section class="playlist-rail" aria-label="Featured playlists">
-                <div class="section-header">
-                    <h3>Featured Playlists</h3>
-                    <a href="#">See all</a>
+            <main class="main-content">
+                <div id="home-screen" class="home-screen">
+                    <section class="featured-section" aria-label="Featured track">
+                        <div id="featured-card" class="featured-card">
+                            <div class="featured-artwork artwork-placeholder" id="featured-artwork" aria-hidden="true"></div>
+                            <div class="featured-shade"></div>
+                            <div class="featured-copy">
+                                <span class="eyebrow">IN THE SPOTLIGHT</span>
+                                <h2 id="featured-title">Finding your next favorite</h2>
+                                <p id="featured-artist">A little something for your listening session.</p>
+                                <button id="featured-play" class="primary-button" type="button" disabled>
+                                    <span aria-hidden="true">▶</span> Play track
+                                </button>
+                            </div>
+                            <span class="featured-index" aria-hidden="true">01</span>
+                            <div class="featured-controls" aria-label="Featured tracks">
+                                <button id="featured-previous" type="button" aria-label="Previous featured track">‹</button>
+                                <button id="featured-next" type="button" aria-label="Next featured track">›</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="tracks-section" aria-labelledby="jump-heading">
+                        <div class="section-header">
+                            <div>
+                                <p class="eyebrow">PICK UP THE VIBE</p>
+                                <h2 id="jump-heading">Jump Back In</h2>
+                            </div>
+                            <button class="text-button" type="button" data-nav="library">Your library <span aria-hidden="true">→</span></button>
+                        </div>
+                        <div id="jump-grid" class="jump-grid">
+                            <p class="empty-state">Loading your music…</p>
+                        </div>
+                    </section>
+
+                    <section class="tracks-section recommendations-section" aria-labelledby="recommendations-heading">
+                        <div class="section-header">
+                            <div>
+                                <p class="eyebrow">MADE FOR THIS MOMENT</p>
+                                <h2 id="recommendations-heading">Recommended for you</h2>
+                            </div>
+                            <span class="section-note">From the SmoothPlays catalog</span>
+                        </div>
+                        <div id="songs-container" class="songs-container">
+                            <p class="empty-state">Loading music…</p>
+                        </div>
+                    </section>
+
+                    <section id="search-results-section" class="tracks-section search-results-section" aria-labelledby="search-results-heading" hidden>
+                        <div class="section-header">
+                            <div>
+                                <p class="eyebrow">YOUR SEARCH</p>
+                                <h2 id="search-results-heading">Results</h2>
+                            </div>
+                        </div>
+                        <div id="search-results" class="songs-container"></div>
+                    </section>
                 </div>
 
-                <div class="playlist-scroller">
-                    <article class="playlist-card">
-                        <div class="cover cover-chill"></div>
-                        <h4>Chill Vibes</h4>
-                        <p>100 songs</p>
-                    </article>
-                    <article class="playlist-card">
-                        <div class="cover cover-workout"></div>
-                        <h4>Workout Mix</h4>
-                        <p>80 songs</p>
-                    </article>
-                    <article class="playlist-card">
-                        <div class="cover cover-lofi"></div>
-                        <h4>Lo-fi Beats</h4>
-                        <p>75 songs</p>
-                    </article>
-                    <article class="playlist-card">
-                        <div class="cover cover-night"></div>
-                        <h4>Night Drive</h4>
-                        <p>64 songs</p>
-                    </article>
-                </div>
-            </section>
+                <section id="library-screen" class="library-screen" aria-labelledby="library-heading" hidden>
+                    <div class="section-header">
+                        <div>
+                            <p class="eyebrow">YOUR COLLECTION</p>
+                            <h2 id="library-heading">Liked Songs</h2>
+                        </div>
+                    </div>
+                    <div id="library-songs" class="songs-container"></div>
+                </section>
 
-            <section class="tracks-section" aria-label="Trending songs">
-                <div class="section-header">
-                    <h3>Trending Songs</h3>
-                    <a href="#">See all</a>
-                </div>
+                <section id="player-screen" class="player-screen" aria-label="Now playing" hidden>
+                    <div class="player-layout">
+                        <div class="player-artwork-wrap">
+                            <div id="detail-artwork" class="detail-artwork artwork-placeholder">
+                            </div>
+                            <span class="artwork-caption">NOW PLAYING</span>
+                        </div>
+                        <div class="track-details">
+                            <p class="eyebrow">YOUR CURRENT TRACK</p>
+                            <h1 id="detail-title">Choose a track</h1>
+                            <p id="detail-artist" class="detail-artist">Select any song to start listening.</p>
+                            <div class="track-facts" id="track-facts" hidden>
+                                <span id="detail-album"></span>
+                                <span id="detail-genre"></span>
+                                <span id="detail-year"></span>
+                                <span id="detail-duration"></span>
+                            </div>
+                            <p id="playback-status" class="playback-status" role="status">Ready when you are</p>
 
-                <div id="songs-container" class="songs-container">
-                    <p class="empty-state">Loading songs...</p>
-                </div>
-            </section>
+                            <div class="track-actions" aria-label="Track actions">
+                                <button id="favorite-button" class="action-button" type="button" aria-pressed="false">
+                                    <span aria-hidden="true">♡</span><span>Like</span>
+                                </button>
+                                <button id="download-button" class="action-button" type="button" disabled title="Downloads are not available in this deployment">
+                                    <span aria-hidden="true">↓</span><span>Download</span>
+                                </button>
+                                <button id="queue-button" class="action-button" type="button">
+                                    <span aria-hidden="true">≡</span><span>Add to queue</span>
+                                </button>
+                            </div>
+                            <p class="action-note">Downloads, recent history, and playlists aren’t enabled in this version.</p>
 
-            <section class="genre-section" aria-label="Genres">
-                <div class="section-header">
-                    <h3>Genres</h3>
-                    <a href="#">See all</a>
-                </div>
+                            <div class="detail-transport">
+                                <button class="transport-button" type="button" data-previous aria-label="Previous track">⏮</button>
+                                <button id="detail-play-button" class="detail-play-button" type="button" aria-label="Play track" disabled>▶</button>
+                                <button class="transport-button" type="button" data-next aria-label="Next track">⏭</button>
+                            </div>
+                            <div class="detail-timeline">
+                                <span data-current-time>0:00</span>
+                                <input type="range" class="detail-progress" data-progress min="0" max="100" value="0" aria-label="Seek through track" disabled>
+                                <span data-duration>--:--</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="genre-grid">
-                    <button class="genre-card genre-rock" type="button">Rock</button>
-                    <button class="genre-card genre-electronic" type="button">Electronic</button>
-                    <button class="genre-card genre-hiphop" type="button">Hip Hop</button>
-                    <button class="genre-card genre-pop" type="button">Pop</button>
-                </div>
-            </section>
-        </main>
-
-        <nav class="bottom-navigation" aria-label="Main navigation">
-            <button class="bottom-link active" type="button" data-nav="home">
-                <span>⌂</span>
-                <small>Home</small>
-            </button>
-            <button class="bottom-link" type="button" data-nav="search">
-                <span>⌕</span>
-                <small>Search</small>
-            </button>
-            <button class="bottom-link" type="button" data-nav="library">
-                <span>▣</span>
-                <small>Library</small>
-            </button>
-        </nav>
+                    <section class="more-section" aria-labelledby="more-heading">
+                        <div class="section-header">
+                            <div>
+                                <p class="eyebrow">KEEP THE MOMENT GOING</p>
+                                <h2 id="more-heading">More from this artist</h2>
+                            </div>
+                        </div>
+                        <div id="more-from-artist" class="more-grid">
+                            <p class="empty-state">Choose a track to explore similar music.</p>
+                        </div>
+                    </section>
+                </section>
+            </main>
+        </div>
     </div>
 
-    <div class="music-player" id="music-player">
-        <div class="player-song">
-            <img id="player-image" src="" alt="Now playing artwork">
+    <nav class="bottom-navigation" aria-label="Main navigation">
+        <button class="bottom-link active" type="button" data-nav="home" aria-current="page"><span aria-hidden="true">⌂</span><small>Home</small></button>
+        <button class="bottom-link" type="button" data-nav="search"><span aria-hidden="true">⌕</span><small>Search</small></button>
+        <button class="bottom-link" type="button" data-nav="library"><span aria-hidden="true">♡</span><small>Library</small></button>
+        <button class="bottom-link" type="button" data-profile><span aria-hidden="true">◉</span><small>Profile</small></button>
+    </nav>
 
+    <div class="music-player" id="music-player" aria-label="Audio player">
+        <div class="player-song">
+            <div id="player-artwork" class="player-artwork artwork-placeholder">
+                <img id="player-image" alt="" hidden>
+            </div>
             <div class="player-song-info">
-                <h4 id="player-title">No song selected</h4>
+                <h2 id="player-title">No song selected</h2>
                 <p id="player-artist">Choose a song to start listening</p>
             </div>
+            <button id="mini-favorite-button" class="mini-favorite" type="button" aria-label="Like track" aria-pressed="false">♡</button>
         </div>
 
-        <div class="player-controls">
-            <div class="player-buttons">
-                <button id="previous-button" aria-label="Previous song">⏮</button>
-                <button id="play-pause-button" aria-label="Play or pause">▶</button>
-                <button id="next-button" aria-label="Next song">⏭</button>
+        <div class="player-center">
+            <div class="player-controls">
+                <button class="mini-control" type="button" data-previous aria-label="Previous track">⏮</button>
+                <button id="play-pause-button" class="mini-play-button" type="button" aria-label="Play">▶</button>
+                <button class="mini-control" type="button" data-next aria-label="Next track">⏭</button>
             </div>
-
             <div class="player-progress">
-                <span id="current-time">0:00</span>
-                <input type="range" id="progress-bar" min="0" max="100" value="0" aria-label="Song progress">
-                <span id="duration">0:00</span>
+                <span data-current-time>0:00</span>
+                <input type="range" id="progress-bar" data-progress min="0" max="100" value="0" aria-label="Seek through track" disabled>
+                <span data-duration>--:--</span>
             </div>
         </div>
-
+        <span id="console-status" class="console-status" aria-live="polite">Ready</span>
         <audio id="main-audio" preload="metadata"></audio>
     </div>
+
+    <dialog id="profile-dialog" class="profile-dialog">
+        <div class="dialog-content">
+            <button class="dialog-close" type="button" aria-label="Close profile">×</button>
+            <span class="brand-mark" aria-hidden="true">s</span>
+            <p class="eyebrow">SMOOTHPLAYS</p>
+            <h2>Profile</h2>
+            <p>Profile accounts aren’t available in this version. Your liked tracks are saved in this browser.</p>
+            <button class="primary-button dialog-dismiss" type="button">Got it</button>
+        </div>
+    </dialog>
 
     <script src="{{ url_for('static', filename='js/songs.js') }}"></script>
     <script>
@@ -150,13 +247,7 @@
             window.addEventListener("load", () => {
                 navigator.serviceWorker.register(
                     "{{ url_for('static', filename='service-worker.js') }}"
-                )
-                .then((registration) => {
-                    console.log("SmoothPlays service worker registered:", registration.scope);
-                })
-                .catch((error) => {
-                    console.error("Service worker registration failed:", error);
-                });
+                ).catch((error) => console.error("Service worker registration failed:", error));
             });
         }
     </script>

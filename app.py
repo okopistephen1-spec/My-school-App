@@ -15,7 +15,20 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", page="home")
+
+
+@app.route("/player/<source>/<track_id>")
+def player(source, track_id):
+    if source not in {"jamendo", "audius", "local"}:
+        return render_template("index.html", page="home"), 404
+    return render_template(
+        "index.html",
+        page="player",
+        player_source=source,
+        player_track_id=track_id,
+    )
+
 
 @app.route("/api/songs")
 def songs_api():
@@ -83,14 +96,22 @@ def jamendo_songs():
         songs = []
 
         for track in data.get("results", []):
+            music_info = track.get("musicinfo")
+            tags = music_info.get("tags") if isinstance(music_info, dict) else {}
+            genres = tags.get("genres") if isinstance(tags, dict) else []
             song = {
                 "id": track.get("id"),
+                "source": "jamendo",
                 "title": track.get("name"),
                 "artist": track.get("artist_name"),
                 "album": track.get("album_name"),
                 "image": track.get("image"),
                 "audio": track.get("audio"),
                 "duration": track.get("duration"),
+                "genre": ", ".join(genre for genre in genres[:3] if isinstance(genre, str))
+                    if isinstance(genres, list) else None,
+                "year": track.get("releasedate", "")[:4]
+                    if isinstance(track.get("releasedate"), str) else None,
                 "download_allowed": track.get("audiodownload_allowed"),
                 "share_url": track.get("shareurl")
             }
@@ -127,6 +148,7 @@ def audius_songs():
 
             song = {
                 "id": track.get("id"),
+                "source": "audius",
                 "title": track.get("title"),
                 "artist": track.get("user", {}).get("name"),
                 "album": None,
@@ -134,6 +156,7 @@ def audius_songs():
                     if track.get("artwork") else None,
                 "audio": track.get("stream", {}).get("url"),
                 "duration": track.get("duration"),
+                "genre": track.get("genre"),
                 "download_allowed": False,
                 "share_url": track.get("permalink")
             }

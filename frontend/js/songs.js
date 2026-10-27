@@ -1,4 +1,7 @@
-const API_BASE_URL = "YOUR_BACKEND_URL";
+const API_BASE_URL = (
+    document.querySelector('meta[name="api-base-url"]')?.content.trim()
+    || window.location.origin
+).replace(/\/+$/, "");
 
 async function loadSongs() {
     const container = document.getElementById("songs-container");

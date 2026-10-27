@@ -1,4 +1,4 @@
-const CACHE_NAME = "smoothplays-v1";
+const CACHE_NAME = "smoothplays-v2";
 
 const APP_FILES = [
     "/",
